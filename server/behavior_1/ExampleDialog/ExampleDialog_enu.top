@@ -1,0 +1,9 @@
+topic: ~ExampleDialog()
+language: iti
+
+
+
+
+u:(~Introduction) ^start(animations/Sit/Gestures/Hey_3)
+Ciao, oggi sarò il tuo compagno di giochi, avanti a te c'è un tablet, per favore inserisci il tuo nome e la tua età. Quando avrai terminato dimmi finito
+u:(~Introduction)

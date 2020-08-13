@@ -1,0 +1,9 @@
+topic: ~Intro()
+language: iti
+
+concept:(registered)[finito fine "ho fatto" basta stop fatto terminato "ho terminato"]
+
+u:(e:onStart) ^start(animations/Sit/Gestures/Hey_3)
+\rspd=15\\vct=100\Ciao io mi chiamo NAO e oggi sarò il tuo compagno di giochi, avanti a te c'è un tablet,  inserisci il tuo nome e la tua età \pau=500\ per favore, non cliccare nessun tasto. Quando avrai terminato dimmi finito
+u:(~registered) ^mode(disabled) \rspd=15\\vct=100\ ora per favore clicca sul tasto "Gioca", così possiamo divertirci insieme! Sul tablet ci sono otto giochi. Per iniziare clicca sull'icona del gioco che più ti piace. 
+

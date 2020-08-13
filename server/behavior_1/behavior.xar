@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram scale="100"><Box name="socket" id="2" localization="8" tooltip="" x="250" y="196"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import socket
+import json
+import os
+import stat
+import random
+from naoqi import ALProxy
+from naoqi import ALBroker
+from naoqi import ALModule
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.memProxy = ALProxy("ALMemory")
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        game = 0
+        self.memProxy.insertData("game", 0)
+        flag = 0
+        self.socket_protocol(flag)
+        pass
+
+    def onInput_loop_input(self):
+        flag = 1
+        self.socket_protocol(flag)
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box
+
+    def socket_protocol(self, flag):
+        if flag == 0:
+            #creo il socket e imposto porta e IP
+            s = socket.socket()
+            port = 49156
+
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind(('localhost', port))
+
+        # put the socket into listening mode
+        s.listen(5)
+
+        # a forever loop until we interrupt it or
+        # an error occurs
+
+        while True:
+
+            # Establish connection with client.
+            c, addr = s.accept()
+
+            data = c.recv(1024)
+            json_data = json.loads(data)
+            user_position = json_data["game"]
+            userPosition = str(user_position)
+            if userPosition in 'log':
+                self.log_dialog()
+            elif userPosition in 'menu':
+                self.memProxy.insertData("game", 0)
+                self.speech_output()
+            if userPosition in 'snake':
+                ALProxy("ALTextToSpeech").say("cerca di far mangiare al serpente quante più mele puoi. Per ogni mela che mangia il serpente diventa un po' piu grande. Fai attenzione a non far toccare la testa con il resto del corpo, altrimenti perderai. Per tornare indietro clicca sul pulsante verde a destra.")
+                self.memProxy.insertData("game", 1)
+                self.speech_output()
+            if userPosition in 'tetris':
+                ALProxy("ALTextToSpeech").say("Il tuo obiettivo è quello di incastrare tutti i mattoncini riempiendo la riga. Se riuscirai a completare la riga essa scomparirà, se non ci riuscirai si sovrapporrà un'altra riga. Una volta arrivato in cima avrai perso. Per tornare indietro clicca sul pulsante verde a destra")
+                self.memProxy.insertData("game", 2)
+                self.speech_output()
+            if userPosition in 'pacman':
+                ALProxy("ALTextToSpeech").say("Sullo schermo vedrai una piccola presentazione dei giocatori. Clicca per iniziare a giocare. Cerca di mangiare tutti i pallini senza farti prendere dai fantasmini, se mangi uno di quelli grandi i fantasmi diventeranno blu per alcuni secondi e tu li potrai mangiare. Hai a disposizione 3 vite, se vieni mangiato 3 volte perderai. Per tornare indietro clicca sul tasto indietro in alto a destra")
+                self.memProxy.insertData("game", 3)
+                self.speech_output()
+            if userPosition in 'angrybirds':
+                ALProxy("ALTextToSpeech").say("In questo gioco devi cercare di volare facendo lo slalom tra i pannelli, se li tocchi perdi. Per volare più in alto clicca sul pulsante accelera. Per tornare indietro clicca sul pulsante indietro")
+                self.memProxy.insertData("game", 4)
+                self.speech_output()
+            if userPosition in 'memorygame':
+                ALProxy("ALTextToSpeech").say("Avanti a te ci sono delle carte, per scoprirle cliccaci sopra, cerca di unire le carte uguali. Quando non riesci a trovare la coppia cerca di memorizzare la posizione delle carte che scopri. Per tornare al menù, clicca sul tasto indietro in alto.")
+                self.memProxy.insertData("game", 5)
+                self.speech_output()
+            if userPosition in 'tris2':
+                ALProxy("ALTextToSpeech").say("In questo gioco puoi sfidare uno dei tuoi amici vicino a te. Uno di voi sarà il giocatore X e l'altro sarà il giocatore O. Vince chi riesce a riempire una riga o una colonna con il proprio simbolo. Per ricominciare clicca su ricomincia, per tornare indietro clicca sul tasto indietro in basso. Che la sfida abbia inizio!")
+                self.memProxy.insertData("game", 6)
+                self.speech_output()
+            if userPosition in 'piano':
+                ALProxy("ALTextToSpeech").say("Se vuoi imparare a suonare il piano, clicca sul tasto scegli un brano e potrai seguire il tutorial su come suonare tanti auguri a te. Cerca di impegnarti perché è una canzone molto veloce. Se sai già suonare, puoi farmi sentire qualcosa. Per tornare indietro clicca sul tasto in alto a destra.")
+                self.memProxy.insertData("game", 7)
+                self.speech_output()
+            if userPosition in 'simon':
+                ALProxy("ALTextToSpeech").say("Sullo schermo saranno riprodotte una sequenza di suoni. Cerca di ricordare la sequenza aiutandoti con i colori. Per tornare indietro clicca sul tasto in alto a destra.")
+                self.memProxy.insertData("game", 8)
+                self.speech_output()
+            if userPosition in 'perso':
+                self.memProxy.insertData("game", 9)
+                self.speech_output()
+            if userPosition in 'vinto':
+                self.memProxy.insertData("game", 10)
+                self.speech_output()
+            if userPosition in 'youtube':
+                ALProxy("ALTextToSpeech").say("buona visione!")
+                self.onStopped()
+            if userPosition in 'trisRestart':
+                self.memProxy.insertData("game", 11)
+                self.speech_output()
+            if userPosition in 'simonRestart':
+                self.memProxy.insertData("game", 12)
+                self.speech_output()
+            if userPosition in 'angryRestart':
+                self.memProxy.insertData("game", 13)
+                self.speech_output()
+            if userPosition in 'stop':
+                ALProxy("ALTextToSpeech").say("è stato bello giocare con te")
+                self.onStopped()
+                #self.speech_output
+
+        # Close the connection with the client
+        c.close()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="loop_input" type="1" type_size="1" nature="1" inner="0" tooltip="" id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="5" /><Output name="speech_output" type="1" type_size="1" nature="2" inner="0" tooltip="" id="6" /><Output name="log_dialog" type="1" type_size="1" nature="2" inner="0" tooltip="" id="7" /></Box><Box name="Set Language" id="1" localization="8" tooltip="Set the language of your robot for the current application. Your robot will speak and understand the selected language as long as your application has focus. Any following call to ALSpeechRecognition (Speech Reco. box for instance), ALTextToSpeech (Say box for instance) or ALDialog will use this language.&#x0A;" x="366" y="371"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        try:
+            self.tts = ALProxy("ALTextToSpeech")
+        except:
+            self.logger.warn("ALTextToSpeech is not available, language setting cannot be applied to speech")
+            self.tts = None
+
+        try:
+            self.asr = ALProxy("ALSpeechRecognition")
+        except:
+            self.logger.warn("ALSpeechRecognition is not available, language setting cannot be applied to recognition")
+            self.asr = None
+
+        try:
+            self.dialog = ALProxy("ALDialog")
+        except:
+            self.logger.warn("ALDialog is not available, language setting cannot be applied to dialog")
+            self.dialog = None
+
+    def onInput_onSet(self):
+        lang = self.getParameter("Language")
+        try:
+            if self.asr:
+                self.asr.setLanguage( self.getParameter("Language") )
+            if self.tts:
+                self.tts.setLanguage( self.getParameter("Language") )
+            if self.dialog:
+                self.dialog.setLanguage( self.getParameter("Language") )
+            if self.tts is None and self.asr is None and self.dialog is None:
+                raise RuntimeError("Cannot set language: neither ALTextToSpeech nor ALSpeechRecognition nor ALDialog is available.")
+            self.onReady()
+        except:
+            error = "Language " + lang + " cannot be set."
+            self.logger.warn(error)
+            self.onError(error)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onSet" type="1" type_size="1" nature="1" inner="0" tooltip="The data is set when a signal is received on this input." id="2" /><Output name="onReady" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when the data has been set." id="3" /><Output name="onError" type="3" type_size="1" nature="2" inner="0" tooltip="Error output:&#x0A;- triggered if the language asked cannot be set" id="4" /><Parameter name="Language" inherits_from_parent="0" content_type="3" value="Italian" default_value="English" custom_choice="1" tooltip="Set the language the robot speaks and understands." id="5"><Choice value="Arabic" /><Choice value="Brazilian" /><Choice value="Chinese" /><Choice value="Czech" /><Choice value="Danish" /><Choice value="Dutch" /><Choice value="English" /><Choice value="Finnish" /><Choice value="French" /><Choice value="German" /><Choice value="Greek" /><Choice value="Italian" /><Choice value="Japanese" /><Choice value="Korean" /><Choice value="MandarinTaiwan" /><Choice value="Norwegian" /><Choice value="Polish" /><Choice value="Portuguese" /><Choice value="Russian" /><Choice value="Spanish" /><Choice value="Swedish" /><Choice value="Turkish" /></Parameter><Resource name="Speech" type="Lock" timeout="0" /></Box><Box name="Intro" id="3" localization="8" tooltip="" x="497" y="377"><dialogFile>../Intro/Intro.dlg</dialogFile><bitmap>media/images/box/box-dialog.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /></Box><Box name="Wait" id="16" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="352" y="485"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[import random
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.waiting = None
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        incoraggiamenti=["Continua così!","stai andando bene!","mi piace giocare con te","mi sto divertendo un mondo","sono sicuro che farai del tuo meglio","è divertente passare del tempo con te","quando gioco con te il tempo vola"]
+        val=random.choice(incoraggiamenti)
+        self.timerOutput(val)
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()
+
+    def onInput_input1(self, value):
+        if value is not None:
+            v = int(value)
+            if v == 1 and self.waiting:
+                 self.waiting.cancel()
+                 self.waiting = None
+        else:
+            self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+        val=random.choice(incoraggiamenti)
+        self.timerOutput(val)
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()
+
+    def onInput_input1(self, value):
+        if value is not None:
+            v = int(value)
+            if v == 1 and self.waiting:
+                 self.waiting.cancel()
+                 self.waiting = None
+        else:
+            self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Input name="input1" type="0" type_size="1" nature="1" inner="0" tooltip="" id="4" /><Output name="timerOutput" type="3" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped and the appropriate parameter is set." id="5" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="6" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="7" /></Box><Box name="Animated Say Text" id="17" localization="8" tooltip="Say the text received on its input and move during its speech.&#x0A;" x="397" y="644"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.tts = ALProxy('ALAnimatedSpeech')
+        self.ttsStop = ALProxy('ALAnimatedSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+
+    def onLoad(self):
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        try:
+            movement = self.getParameter("Speaking movement mode")
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            sentence +=  "\RST\ "
+            id = self.tts.post.say(str(sentence), {"speakingMovementMode":movement})
+            self.ids.append(id)
+            self.tts.wait(id, 0)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" /><Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" /><Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" /><Parameter name="Speaking movement mode" inherits_from_parent="0" content_type="3" value="disabled" default_value="contextual" custom_choice="0" tooltip="Change the body language mode during the speech.&#x0A;disabled: The robot will only play the animations given by the user through the animation parameter.&#x0A;random: During time the robot has no animation to play, he will launch random neutral animations.&#x0A;contextual: During time the robot has no animation to play, he will try to launch a new one accordingly to the saying text. Every time the robot can&apos;t find a contextual animation he will launch a random neutral animation." id="7"><Choice value="disabled" /><Choice value="random" /><Choice value="contextual" /></Parameter></Box><Box name="Wait (1)" id="8" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="161" y="462"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[import random
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.memProxy = ALProxy("ALMemory")
+
+    def onLoad(self):
+        self.waiting = None
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        value = self.memProxy.getData("game")
+        self.logger.warn(value)
+        #animazione="^start(animations/Sit/BodyTalk/Speaking/BodyTalk_2)"
+        if value == 0:
+            ALProxy("ALTextToSpeech").say("Giochiamo")
+        if value == 1:
+            incoraggiamenti=["mangia più mele che puoi","cerca di non toccarti la coda con la testa"]
+        if value == 2:
+            incoraggiamenti=["cerca di incastrare tutti i mattoncini","se arriveranno in cima, perderai","incastra i mattoncini nel miglior modo possibile"]
+        if value == 3:
+            incoraggiamenti=["cerca di scappare dai fantasmini","mangia più pallini che puoi","non farti prendere dai fantasmini"]
+        if value == 4:
+            incoraggiamenti=["tocca lo schermo per volare più in alto","non toccare i pannelli verdi","fai lo slalom tra i pannelli"]
+        if value == 5:
+            incoraggiamenti=["unisci le carte uguali","cerca di ricordare le posizioni quando scopri le carte","questo gioco stimola la tua memoria"]
+        if value == 6:
+            incoraggiamenti=["completa la riga o la colonna per vincere","sarà una sfida avvincente","che bella mossa","ottima strategia"]
+        if value == 7:
+            incoraggiamenti=["dai sfogo alla creatività","puoi imparare a suonare scegliendo un brano","che pianista","che bella melodia","mi piace la tua musica"]
+        if value == 8:
+            incoraggiamenti=["riproduci i suoni nello stesso ordine","cerca di ricordare la sequenza","aiutati con i colori"]
+        if value == 9:
+            incoraggiamenti=["non preoccuparti, sono sicuro che puoi fare di meglio","puoi ritentare!","la prossima volta andrà meglio"]
+        if value == 10:
+            incoraggiamenti=["hai vinto!","che vittoria!","insieme siamo una squadra imbattibile"]
+        if value == 11:
+            incoraggiamenti=["completa la riga o la colonna per vincere","sarà una sfida avvincente","che bella mossa","ottima strategia"]
+        if value == 12:
+            incoraggiamenti=["riproduci i suoni nello stesso ordine","cerca di ricordare la sequenza","aiutati con i colori"]
+        if value == 13:
+            incoraggiamenti=["tocca lo schermo per volare più in alto","non toccare i pannelli verdi","fai lo slalom tra i pannelli"]
+        randval=random.choice(incoraggiamenti)
+        #val = animazione+randval
+        self.timerOutput(randval)
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()
+
+    def onInput_input1(self, value):
+        if value is not None:
+            v = int(value)
+            if v == 1 and self.waiting:
+                 self.waiting.cancel()
+                 self.waiting = None
+        else:
+            self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Input name="input1" type="0" type_size="1" nature="1" inner="0" tooltip="" id="4" /><Output name="timerOutput" type="3" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped and the appropriate parameter is set." id="5" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="6" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="7" /></Box><Box name="Animated Say Text (1)" id="9" localization="8" tooltip="Say the text received on its input and move during its speech.&#x0A;" x="250" y="594"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.tts = ALProxy('ALAnimatedSpeech')
+        self.ttsStop = ALProxy('ALAnimatedSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+
+    def onLoad(self):
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        try:
+            movement = self.getParameter("Speaking movement mode")
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            sentence +=  "\RST\ "
+            id = self.tts.post.say(str(sentence), {"speakingMovementMode":movement})
+            self.ids.append(id)
+            self.tts.wait(id, 0)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" /><Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" /><Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" /><Parameter name="Speaking movement mode" inherits_from_parent="0" content_type="3" value="contextual" default_value="contextual" custom_choice="0" tooltip="Change the body language mode during the speech.&#x0A;disabled: The robot will only play the animations given by the user through the animation parameter.&#x0A;random: During time the robot has no animation to play, he will launch random neutral animations.&#x0A;contextual: During time the robot has no animation to play, he will try to launch a new one accordingly to the saying text. Every time the robot can&apos;t find a contextual animation he will launch a random neutral animation." id="7"><Choice value="disabled" /><Choice value="random" /><Choice value="contextual" /></Parameter></Box><Box name="Face Tracker" id="4" localization="-1" tooltip="This box makes the robot track a face with different modes." x="196" y="24"><bitmap>media/images/box/interaction/target_face.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.tracker = ALProxy( "ALTracker" )
+        self.memory = ALProxy("ALMemory")
+        self.targetName = "Face"
+        self.distanceX = 0.0
+        self.distanceY = 0.0
+        self.angleWz = 0.0
+        self.thresholdX = 0.0
+        self.thresholdY = 0.0
+        self.thresholdWz = 0.0
+        self.subscribeDone = False
+        self.effector = "None"
+        self.isRunning = False
+
+    def onLoad(self):
+        self.BIND_PYTHON(self.getName(), "setParameter")
+        self.BIND_PYTHON(self.getName(), "onTargetLost")
+        self.BIND_PYTHON(self.getName(), "onTargetReached")
+        self.BIND_PYTHON(self.getName(), "onTargetChanged")
+        self.memory.subscribeToEvent("ALTracker/ActiveTargetChanged", self.getName(), "onTargetChanged")
+
+    def onUnload(self):
+        if self.subscribeDone:
+            self.memory.unsubscribeToEvent("ALTracker/TargetLost", self.getName())
+            self.memory.unsubscribeToEvent("ALTracker/TargetReached", self.getName())
+            self.subscribeDone = False
+
+        if self.isRunning:
+            self.tracker.setEffector("None")
+            self.tracker.stopTracker()
+            self.tracker.unregisterTarget(self.targetName)
+            self.isRunning = False
+
+    def onInput_onStart(self):
+        self.memory.subscribeToEvent("ALTracker/TargetLost", self.getName(), "onTargetLost")
+        self.memory.subscribeToEvent("ALTracker/TargetReached", self.getName(), "onTargetReached")
+        self.subscribeDone = True
+
+        mode = self.getParameter("Mode")
+        width = self.getParameter("Width (m)")
+        self.distanceX = self.getParameter("Distance X (m)")
+        self.thresholdX = self.getParameter("Threshold X (m)")
+        self.distanceY = self.getParameter("Distance Y (m)")
+        self.thresholdY = self.getParameter("Threshold Y (m)")
+        self.angleWz = self.getParameter("Theta (rad)")
+        self.thresholdWz = self.getParameter("Threshold Theta (rad)")
+        self.effector = self.getParameter("Effector")
+
+        self.tracker.setEffector(self.effector)
+
+        self.tracker.registerTarget(self.targetName, width)
+        self.tracker.setRelativePosition([-self.distanceX, self.distanceY, self.angleWz,
+                                           self.thresholdX, self.thresholdY, self.thresholdWz])
+        self.tracker.setMode(mode)
+
+        self.tracker.track(self.targetName) #Start tracker
+        self.isRunning = True
+
+    def onInput_onStop(self):
+        self.onStopped()
+        self.onUnload()
+
+    def setParameter(self, parameterName, newValue):
+        GeneratedClass.setParameter(self, parameterName, newValue)
+        if (parameterName == "Mode"):
+            self.tracker.setMode(newValue)
+            return
+
+        if (parameterName == "Width (m)"):
+            self.tracker.registerTarget(self.targetName, newValue)
+            return
+
+        if (parameterName == "Distance X (m)"):
+            self.distanceX = newValue
+            self.tracker.setRelativePosition([-self.distanceX, self.distanceY, self.angleWz,
+                                               self.thresholdX, self.thresholdY, self.thresholdWz])
+            return
+
+        if (parameterName == "Distance Y (m)"):
+            self.distanceY = newValue
+            self.tracker.setRelativePosition([-self.distanceX, self.distanceY, self.angleWz,
+                                               self.thresholdX, self.thresholdY, self.thresholdWz])
+            return
+
+        if (parameterName == "Theta (rad)"):
+            self.angleWz = newValue
+            self.tracker.setRelativePosition([-self.distanceX, self.distanceY, self.angleWz,
+                                               self.thresholdX, self.thresholdY, self.thresholdWz])
+            return
+
+        if (parameterName == "Threshold X (m)"):
+            self.thresholdX = newValue
+            self.tracker.setRelativePosition([-self.distanceX, self.distanceY, self.angleWz,
+                                               self.thresholdX, self.thresholdY, self.thresholdWz])
+            return
+
+        if (parameterName == "Threshold Y (m)"):
+            self.thresholdY = newValue
+            self.tracker.setRelativePosition([-self.distanceX, self.distanceY, self.angleWz,
+                                               self.thresholdX, self.thresholdY, self.thresholdWz])
+            return
+
+        if (parameterName == "Threshold Theta (rad)"):
+            self.thresholdWz = newValue
+            self.tracker.setRelativePosition([-self.distanceX, self.distanceY, self.angleWz,
+                                               self.thresholdX, self.thresholdY, self.thresholdWz])
+            return
+
+        if(parameterName == "Effector"):
+            self.tracker.setEffector(newValue)
+            self.effector = newValue
+            return
+
+    def onTargetLost(self, key, value, message):
+        self.targetLost()
+
+    def onTargetReached(self, key, value, message):
+        self.targetReached()
+
+    def onTargetChanged(self, key, value, message):
+        if value == self.targetName and not self.subscribeDone:
+            self.memory.subscribeToEvent("ALTracker/TargetLost", self.getName(), "onTargetLost")
+            self.memory.subscribeToEvent("ALTracker/TargetReached", self.getName(), "onTargetReached")
+            self.subscribeDone = True
+        elif value != self.targetName and self.subscribeDone:
+            self.memory.unsubscribeToEvent("ALTracker/TargetLost", self.getName())
+            self.memory.unsubscribeToEvent("ALTracker/TargetReached", self.getName())
+            self.subscribeDone = False]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Output name="targetLost" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when the target is lost." id="5" /><Output name="targetReached" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when the target is reached." id="6" /><Parameter name="Mode" inherits_from_parent="0" content_type="3" value="Head" default_value="Head" custom_choice="0" tooltip="Set tracker mode" id="7"><Choice value="Head" /><Choice value="WholeBody" /><Choice value="Move" /></Parameter><Parameter name="Effector" inherits_from_parent="0" content_type="3" value="None" default_value="None" custom_choice="0" tooltip="Set effector to use for tracking. Head is always used." id="8"><Choice value="None" /><Choice value="Arms" /><Choice value="LArm" /><Choice value="RArm" /></Parameter><Parameter name="Width (m)" inherits_from_parent="0" content_type="2" value="0.1" default_value="0.1" min="0.01" max="0.6" tooltip="Width of the face in meters" id="9" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="0.3" default_value="0.3" min="0.01" max="5" tooltip="Distance on X axis the robot will try to maintain from its target in move modes." id="10" /><Parameter name="Threshold X (m)" inherits_from_parent="0" content_type="2" value="0.1" default_value="0.1" min="0.01" max="1" tooltip="Threshold above which the robot will move to track its target in move modes." id="11" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-5" max="5" tooltip="Distance on Y axis the robot will try to maintain from its target in move modes." id="12" /><Parameter name="Threshold Y (m)" inherits_from_parent="0" content_type="2" value="0.1" default_value="0.1" min="0.01" max="1" tooltip="Threshold above which the robot will move to track its target in move modes." id="13" /><Parameter name="Theta (rad)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="Wz angle of the vector robot-target the robot will try to maintain in move modes." id="14" /><Parameter name="Threshold Theta (rad)" inherits_from_parent="0" content_type="2" value="0.3" default_value="0.3" min="0" max="3.14" tooltip="Threshold of the angle of the vector robot-target above which the robot will move to track its target in move modes." id="15" /></Box><Link inputowner="3" indexofinput="2" outputowner="1" indexofoutput="3" /><Link inputowner="1" indexofinput="2" outputowner="2" indexofoutput="7" /><Link inputowner="2" indexofinput="4" outputowner="3" indexofoutput="4" /><Link inputowner="17" indexofinput="2" outputowner="16" indexofoutput="5" /><Link inputowner="9" indexofinput="2" outputowner="8" indexofoutput="5" /><Link inputowner="8" indexofinput="2" outputowner="17" indexofoutput="4" /><Link inputowner="8" indexofinput="2" outputowner="2" indexofoutput="6" /><Link inputowner="16" indexofinput="2" outputowner="9" indexofoutput="4" /><Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="5" /><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
