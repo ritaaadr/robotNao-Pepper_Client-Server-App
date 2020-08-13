@@ -1,0 +1,43 @@
+.grid-container {
+    display: grid;
+    grid-template-columns: 120px 120px 120px 120px;
+    grid-gap: 40px;
+    padding: 10px;
+  }
+  
+  .grid-container > div {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 10px;
+  }
+  
+  .snake {
+    grid-column: 1 / span 1;
+  }
+
+  .tetris {
+    grid-column: 2 / span 1;
+  }
+
+  #pacman {
+    grid-column: 3 / span 1;
+} 
+
+#angryBirds {
+    grid-column: 4 / span 1;
+} 
+
+#memorycards {
+    grid-row: 2 / span 1;
+}
+
+#tris {
+    grid-row: 2 / span 1;
+}
+
+
+#lab{
+    font-size: medium;
+    margin-left: 5px;
+    margin-top: 5px;
+}

@@ -1,0 +1,26 @@
+.content {
+    max-width: 370px;
+    margin-top: 70px;
+    margin-bottom: 100px;
+    margin-right: 150px;
+    margin-left: 450px;
+    /*outline: 5px dotted purple;*/
+  }
+
+  .label {
+    font-size: 30px;
+    margin-top: 125px;
+    margin-left: -10px;
+    color: gray;
+  }
+
+  .name-input{
+    margin-left: 10px;
+    height:30px;
+  }
+
+  .age-input{
+    margin-top: 5px; 
+    margin-left: 47px;
+    height:30px;
+  }
